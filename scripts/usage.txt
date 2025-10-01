@@ -1,0 +1,4 @@
+chmod +x deploy_luanti_mineclonia.sh
+./deploy_luanti_mineclonia.sh bootstrap   # first time (volumes + download + run)
+./deploy_luanti_mineclonia.sh status
+./deploy_luanti_mineclonia.sh logs
