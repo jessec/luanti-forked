@@ -2,3 +2,30 @@ chmod +x deploy_luanti_mineclonia.sh
 ./deploy_luanti_mineclonia.sh bootstrap   # first time (volumes + download + run)
 ./deploy_luanti_mineclonia.sh status
 ./deploy_luanti_mineclonia.sh logs
+
+
+
+
+
+How to use
+
+First time (or after updates to the game):
+
+# Run the one-shot seeder (safe to re-run any time)
+docker compose run --rm seed
+
+# Start (or restart) the server
+docker compose up -d luanti
+
+# Watch logs
+docker compose logs -f luanti
+
+Change port or world name
+
+Port: edit both ports: and the --port value (e.g. 31000).
+
+World: change eduquest wherever it appears.
+
+Updating Mineclonia later
+docker compose run --rm seed
+docker compose restart luanti

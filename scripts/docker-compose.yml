@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  # One-shot initializer: downloads Mineclonia and stages it in the user games path
+  seed:
+    image: alpine:3.20
+    entrypoint: ["/bin/sh","-lc"]
+    command: |
+      set -e
+      apk add --no-cache curl unzip >/dev/null
+      # Download Mineclonia to a temp path within the container
+      mkdir -p /tmp/games && cd /tmp/games
+      echo "Fetching Mineclonia..."
+      curl -fL -o mineclonia.zip "https://content.eduquest.vip/packages/rubenwardy/mineclonia/download"
+      unzip -q mineclonia.zip && rm -f mineclonia.zip
+      [ -d mineclonia ] || mv mineclonia-* mineclonia
+      test -f mineclonia/game.conf
+
+      # Copy to Luanti's user path in the data volume
+      mkdir -p /data/.minetest/games
+      rm -rf /data/.minetest/games/mineclonia
+      cp -a mineclonia /data/.minetest/games/
+      echo "Game staged at /var/lib/minetest/.minetest/games/mineclonia ✅"
+
+      # Ensure world dir + minimal config exist
+      mkdir -p /data/worlds/eduquest
+      mkdir -p /config
+      [ -f /config/minetest.conf ] || cat > /config/minetest.conf <<'CFG'
+# --- minimal defaults, extend as needed ---
+# max_users = 60
+# enable_ipv6 = true
+CFG
+      echo "World + config ready ✅"
+    volumes:
+      - luanti-data:/data
+      - luanti-config:/config
+    restart: "no"
+
+  luanti:
+    image: luanti-server:local
+    # Start after seeding (compose starts in order; seed is quick & idempotent)
+    depends_on:
+      - seed
+    ports:
+      - "30000:30000/tcp"
+      - "30000:30000/udp"
+    volumes:
+      - luanti-data:/var/lib/minetest
+      - luanti-config:/etc/minetest
+    command:
+      - --world
+      - /var/lib/minetest/worlds/eduquest
+      - --gameid
+      - mineclonia
+      - --config
+      - /etc/minetest/minetest.conf
+      - --port
+      - "30000"
+    restart: unless-stopped
+
+volumes:
+  luanti-data:
+  luanti-config:
+
