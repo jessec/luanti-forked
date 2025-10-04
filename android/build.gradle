@@ -5,7 +5,7 @@ project.ext.set("versionMinor", 14)     // Version Minor
 project.ext.set("versionPatch", 0)      // Version Patch
 // ^ keep in sync with cmake
 
-project.ext.set("versionBuild", 12)      // Version Build
+project.ext.set("versionBuild", 13)      // Version Build
 // ^ fourth version number to allow releasing Android-only fixes and beta versions
 
 buildscript {
